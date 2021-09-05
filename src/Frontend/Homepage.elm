@@ -1,5 +1,6 @@
 module Frontend.Homepage exposing (view)
 
+import Common exposing (User)
 import Element.WithContext as Element exposing (centerX, centerY, column, el, fill, height, px, scrollbarY, width, wrappedRow)
 import Element.WithContext.Font as Font
 import Element.WithContext.Input as Input

@@ -2,9 +2,7 @@ module Types exposing
     ( AuthorizedPage(..)
     , BackendModel
     , BackendMsg(..)
-    , Cell(..)
     , Context
-    , Email
     , FrontendModel
     , FrontendMsg(..)
     , GameModel(..)
@@ -12,71 +10,30 @@ module Types exposing
     , InnerBackendModel
     , Language(..)
     , LoginPageData
-    , Nickname
     , Page(..)
-    , PasswordHash
-    , PlayerId
     , PublicPage(..)
     , Route(..)
     , TBAuthenticated(..)
-    , TicTacToeCommon
-    , TicTacToeLocal
-    , TicTacToeShared
     , ToBackend(..)
     , ToFrontend(..)
-    , User
-    , UsersDb
-    , getUserByEmailAndPassowrd
-    , getUserByPlayerId
     , initLoginPageData
     , initTicTacToe
-    , initUserDb
     , pageToRoute
-    , passwordHash
-    , registerUser
     , routeToUrl
-    , updateUserByPlayerId
     , urlToRoute
     )
 
-import Array exposing (Array)
 import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
+import Common exposing (Email, GameId, PasswordHash, PlayerId, User)
 import Dict exposing (Dict)
 import Lamdera exposing (ClientId, SessionId)
-import Sha256
+import TicTacToe
 import Time
 import Url exposing (Url)
 import Url.Builder
 import Url.Parser exposing ((</>))
-
-
-type alias User =
-    { nickname : Nickname
-    , isAdmin : Bool
-    , email : Email
-    }
-
-
-type alias Nickname =
-    String
-
-
-type alias Email =
-    String
-
-
-type alias PlayerId =
-    String
-
-
-type PasswordHash
-    = PasswordHash String
-
-
-passwordHash : String -> PasswordHash
-passwordHash =
-    PasswordHash << Sha256.sha256
+import UsersDb exposing (UsersDb)
 
 
 type alias Context =
@@ -193,39 +150,9 @@ type GameRoute
     | TicTacToePlayingRoute GameId
 
 
-type alias GameId =
-    String
-
-
 type GameModel
     = TicTacToeLobby
-    | TicTacToePlaying
-        { gameId : GameId
-        , local : TicTacToeLocal
-        , shared : TicTacToeShared
-        , common : TicTacToeCommon
-        , others : Dict PlayerId TicTacToeShared
-        }
-
-
-type alias TicTacToeLocal =
-    {}
-
-
-type alias TicTacToeShared =
-    { isCross : Bool
-    }
-
-
-type alias TicTacToeCommon =
-    { grid : Array (Array Cell)
-    }
-
-
-type Cell
-    = Cross
-    | Naught
-    | Empty
+    | TicTacToePlaying TicTacToe.Model
 
 
 type alias BackendModel =
@@ -280,67 +207,6 @@ type ToFrontend
 -- UsersDb
 
 
-type UsersDb
-    = UsersDb
-        { users : Dict PlayerId ( User, PasswordHash )
-        , emailToPlayerId : Dict Email PlayerId
-        }
-
-
-initUserDb : UsersDb
-initUserDb =
-    UsersDb
-        { users = Dict.empty
-        , emailToPlayerId = Dict.empty
-        }
-
-
-registerUser : Nickname -> Email -> PasswordHash -> UsersDb -> Maybe UsersDb
-registerUser nickname email hash (UsersDb { users, emailToPlayerId }) =
-    if Dict.member email emailToPlayerId then
-        Nothing
-
-    else
-        let
-            playerId =
-                email
-
-            newUser =
-                { email = email
-                , nickname = nickname
-                , isAdmin = False
-                }
-        in
-        Just <|
-            UsersDb
-                { users = Dict.insert playerId ( newUser, hash ) users
-                , emailToPlayerId = Dict.insert email playerId emailToPlayerId
-                }
-
-
-getUserByEmailAndPassowrd : Email -> PasswordHash -> UsersDb -> Maybe ( PlayerId, User )
-getUserByEmailAndPassowrd email hash (UsersDb { users, emailToPlayerId }) =
-    Dict.get email emailToPlayerId
-        |> Maybe.andThen
-            (\playerId ->
-                Dict.get playerId users
-                    |> Maybe.andThen
-                        (\( user, expectedHash ) ->
-                            if expectedHash == hash then
-                                Just ( playerId, user )
-
-                            else
-                                Nothing
-                        )
-            )
-
-
-getUserByPlayerId : PlayerId -> UsersDb -> Maybe User
-getUserByPlayerId playerId (UsersDb { users }) =
-    Dict.get playerId users
-        |> Maybe.map Tuple.first
-
-
 initTicTacToe : GameModel
 initTicTacToe =
     TicTacToeLobby
@@ -369,14 +235,3 @@ pageToRoute page =
 
                     TicTacToePlaying { gameId } ->
                         TicTacToePlayingRoute gameId
-
-
-updateUserByPlayerId : PlayerId -> (User -> User) -> UsersDb -> UsersDb
-updateUserByPlayerId playerId f (UsersDb db) =
-    UsersDb
-        { db
-            | users =
-                Dict.update playerId
-                    (Maybe.map <| Tuple.mapFirst f)
-                    db.users
-        }

@@ -3,7 +3,8 @@ module Frontend exposing (..)
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Dom
 import Browser.Navigation as Nav exposing (Key)
-import Element.WithContext as Element exposing (alignRight, centerX, centerY, el, fill, height, link, px, shrink, text, width)
+import Common as Common exposing (User)
+import Element.WithContext as Element exposing (alignRight, centerX, centerY, el, fill, height, px, shrink, text, width)
 import Element.WithContext.Background as Background
 import Element.WithContext.Font as Font
 import Element.WithContext.Input as Input
@@ -269,7 +270,7 @@ viewLoginBox loginPageData =
                     ]
                 }
             , Input.button [ alignRight ]
-                { onPress = Just <| Login loginPageData.email <| Types.passwordHash loginPageData.password
+                { onPress = Just <| Login loginPageData.email <| Common.passwordHash loginPageData.password
                 , label = Theme.box [] <| text "Login"
                 }
             ]

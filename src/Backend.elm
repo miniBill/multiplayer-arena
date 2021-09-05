@@ -1,5 +1,6 @@
 module Backend exposing (..)
 
+import Common as Common exposing (PasswordHash, PlayerId, User)
 import Dict
 import Lamdera exposing (ClientId, SessionId)
 import Process
@@ -7,6 +8,7 @@ import Task
 import Time
 import Types exposing (..)
 import Update.Pipeline as Update
+import UsersDb as UsersDb
 
 
 type alias Model =
@@ -47,7 +49,7 @@ init =
 
 superAdmin : ( User, PasswordHash )
 superAdmin =
-    ( superAdminUser, Types.passwordHash "wololo" )
+    ( superAdminUser, Common.passwordHash "wololo" )
 
 
 superAdminUser : User
@@ -68,9 +70,9 @@ update msg m =
             Update.save <|
                 Just <|
                     { users =
-                        Types.initUserDb
-                            |> Types.registerUser "ADMIN" "cmt.miniBill@gmail.com" (Types.passwordHash "wololo")
-                            |> Maybe.withDefault Types.initUserDb
+                        UsersDb.init
+                            |> UsersDb.registerUser "ADMIN" "cmt.miniBill@gmail.com" (Common.passwordHash "wololo")
+                            |> Maybe.withDefault UsersDb.init
                     , now = now
                     , activeSessions = Dict.empty
                     }
@@ -93,7 +95,7 @@ update msg m =
                             )
 
                         else
-                            case Types.getUserByPlayerId playerId model.users of
+                            case UsersDb.getUserByPlayerId playerId model.users of
                                 Nothing ->
                                     ( { model | activeSessions = Dict.remove sessionId model.activeSessions }
                                     , Lamdera.sendToFrontend sessionId TFLogout
@@ -119,7 +121,7 @@ updateFromFrontend sessionId clientId msg m =
                     (\model ->
                         case msg of
                             TBLogin email passwordHash ->
-                                case Types.getUserByEmailAndPassowrd email passwordHash model.users of
+                                case UsersDb.getUserByEmailAndPassowrd email passwordHash model.users of
                                     Nothing ->
                                         ( model, Lamdera.sendToFrontend clientId <| TFLoginResult (Err "Invalid username/password") )
 
@@ -146,7 +148,7 @@ updateFromFrontend sessionId clientId msg m =
                                         ( model, Lamdera.sendToFrontend sessionId TFLogout )
 
                                     Just { playerId } ->
-                                        case Types.getUserByPlayerId playerId model.users of
+                                        case UsersDb.getUserByPlayerId playerId model.users of
                                             Nothing ->
                                                 ( model, Lamdera.sendToFrontend sessionId TFLogout )
 
@@ -168,7 +170,7 @@ updateAuthenticated playerId _ msg model =
             Update.save
                 { model
                     | users =
-                        Types.updateUserByPlayerId playerId (\u -> { u | nickname = newNickname }) model.users
+                        UsersDb.updateUserByPlayerId playerId (\u -> { u | nickname = newNickname }) model.users
                 }
 
 
