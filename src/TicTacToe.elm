@@ -4,6 +4,7 @@ module TicTacToe exposing
     , TicTacToeCommon
     , TicTacToeLocal
     , TicTacToeShared
+    , init
     )
 
 import Array exposing (Array)
@@ -12,12 +13,13 @@ import Dict exposing (Dict)
 
 
 type alias Model =
-    { gameId : GameId
-    , local : TicTacToeLocal
-    , shared : TicTacToeShared
-    , common : TicTacToeCommon
-    , others : Dict PlayerId TicTacToeShared
-    }
+    Maybe
+        { gameId : GameId
+        , local : TicTacToeLocal
+        , shared : TicTacToeShared
+        , common : TicTacToeCommon
+        , others : Dict PlayerId TicTacToeShared
+        }
 
 
 type alias TicTacToeLocal =
@@ -38,3 +40,8 @@ type Cell
     = Cross
     | Naught
     | Empty
+
+
+init : Model
+init =
+    Nothing

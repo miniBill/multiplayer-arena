@@ -5,7 +5,9 @@ import Element.WithContext as Element exposing (centerX, centerY, column, el, fi
 import Element.WithContext.Font as Font
 import Element.WithContext.Input as Input
 import Frontend.Common exposing (Msg)
+import Route exposing (AuthorizedPage(..), GamePage(..), GameRoute(..), Page(..), Route(..))
 import Theme exposing (Element)
+import TicTacToe
 import Types exposing (..)
 
 
@@ -28,11 +30,11 @@ ticktactoeSlot maybeUser =
             case maybeUser of
                 Nothing ->
                     LoginPage <|
-                        Types.initLoginPageData <|
+                        Route.initLoginPageData <|
                             GameRoute TicTacToeLobbyRoute
 
                 Just user ->
-                    AuthorizedPage user <| GamePage Types.initTicTacToe
+                    AuthorizedPage user <| GamePage <| TicTacToePage TicTacToe.init
     in
     Input.button []
         { label =

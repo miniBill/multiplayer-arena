@@ -1,6 +1,9 @@
-module Model exposing (L10N, l6e, map)
+module L10N exposing (L10N, Language(..), l6e, map)
 
-import Types exposing (Language(..))
+
+type Language
+    = English
+    | Italian
 
 
 type alias L10N a =

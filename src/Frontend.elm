@@ -11,7 +11,9 @@ import Element.WithContext.Input as Input
 import Frontend.Common exposing (Model, Msg)
 import Frontend.Homepage
 import Html
+import L10N exposing (Language(..))
 import Lamdera
+import Route exposing (AuthorizedPage(..), GamePage(..), GameRoute(..), LoginPageData, Page(..), PublicPage(..), Route(..))
 import Task
 import Theme exposing (Attribute, Element)
 import Time
@@ -59,7 +61,7 @@ init url key =
         initialModel =
             { key = key
             , context = initialContext
-            , page = WaitingLoginDataFromServer <| urlToRoute url
+            , page = WaitingLoginDataFromServer <| Route.urlToRoute url
             , size = ( 800, 600 )
             }
     in
@@ -87,11 +89,11 @@ update msg model =
                     ( model, Nav.load url )
 
         UrlChanged url ->
-            if Types.urlToRoute url /= Types.pageToRoute model.page then
+            if Route.urlToRoute url /= Route.pageToRoute model.page then
                 Update.save
                     { model
                         | page =
-                            toPage (Types.urlToRoute url) (getCurrentUser model.page)
+                            toPage (Route.urlToRoute url) (getCurrentUser model.page)
                     }
 
             else
@@ -117,7 +119,7 @@ update msg model =
             Update.save { model | page = page }
 
         SwitchPage page ->
-            ( { model | page = page }, Nav.pushUrl model.key <| Types.routeToUrl <| Types.pageToRoute page )
+            ( { model | page = page }, Nav.pushUrl model.key <| Route.routeToUrl <| Route.pageToRoute page )
 
 
 getCurrentUser : Page -> Maybe User
@@ -153,7 +155,7 @@ updateFromBackend msg model =
                             toPage data.next <| Just user
                     in
                     { model | page = page }
-                        |> Update.addCmd (Nav.replaceUrl model.key <| Types.routeToUrl <| pageToRoute page)
+                        |> Update.addCmd (Nav.replaceUrl model.key <| Route.routeToUrl <| Route.pageToRoute page)
 
         ( TFLogout, LoginPage _ ) ->
             Update.save model
@@ -168,10 +170,10 @@ updateFromBackend msg model =
             Update.save { model | page = AuthorizedPage user data }
 
         ( TFLoginResult (Err _), AuthorizedPage _ _ ) ->
-            Update.save { model | page = LoginPage <| Types.initLoginPageData <| Types.pageToRoute model.page }
+            Update.save { model | page = LoginPage <| Route.initLoginPageData <| Route.pageToRoute model.page }
 
         ( TFLogout, AuthorizedPage _ _ ) ->
-            Update.save { model | page = LoginPage <| Types.initLoginPageData <| Types.pageToRoute model.page }
+            Update.save { model | page = LoginPage <| Route.initLoginPageData <| Route.pageToRoute model.page }
 
         ( TFLoginResult r, PublicPage _ name ) ->
             Update.save { model | page = PublicPage (Result.toMaybe r) name }
@@ -187,23 +189,23 @@ toPage name user =
             PublicPage user FourOhFour
 
         ( GameRoute _, Nothing ) ->
-            LoginPage <| initLoginPageData name
+            LoginPage <| Route.initLoginPageData name
 
         ( GameRoute gr, Just u ) ->
             let
                 toGame g =
                     case g of
                         TicTacToeLobbyRoute ->
-                            TicTacToeLobby
+                            TicTacToePage Nothing
 
                         TicTacToePlayingRoute _ ->
                             -- TODO resume game
-                            TicTacToeLobby
+                            TicTacToePage Nothing
             in
             AuthorizedPage u <| GamePage <| toGame gr
 
         ( LoginRoute, Nothing ) ->
-            LoginPage <| initLoginPageData HomepageRoute
+            LoginPage <| Route.initLoginPageData HomepageRoute
 
         ( LoginRoute, Just _ ) ->
             PublicPage user Homepage
@@ -294,11 +296,11 @@ innerView { page } =
 
         AuthorizedPage _ (GamePage game) ->
             case game of
-                TicTacToeLobby ->
+                TicTacToePage Nothing ->
                     el [ centerX, centerY, Font.size Theme.fontSizes.huge ] <|
                         text "Tic Tac Toe lobby [TODO]"
 
-                TicTacToePlaying _ ->
+                TicTacToePage (Just _) ->
                     text "TODO"
 
 
@@ -325,7 +327,7 @@ homepageElement page =
             _ ->
                 Theme.link [ Theme.padding ]
                     { label = text "Homepage"
-                    , url = Types.routeToUrl HomepageRoute
+                    , url = Route.routeToUrl HomepageRoute
                     }
 
 
