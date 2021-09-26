@@ -36,7 +36,7 @@ ticktactoeSlot maybeUser =
                 Just user ->
                     AuthorizedPage user <| GamePage <| TicTacToePage TicTacToe.init
     in
-    Input.button []
+    Element.link []
         { label =
             Theme.box [ Font.size 40 ] <|
                 column []
@@ -46,5 +46,5 @@ ticktactoeSlot maybeUser =
                         , description = "Example of a TicTacToe match"
                         }
                     ]
-        , onPress = Just <| SwitchPage <| next
+        , url = next
         }

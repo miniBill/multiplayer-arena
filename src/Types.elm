@@ -4,8 +4,6 @@ module Types exposing
     , Context
     , FrontendModel
     , FrontendMsg(..)
-    , InnerBackendModel
-    , TBAuthenticated(..)
     , ToBackend(..)
     , ToFrontend(..)
     )
@@ -38,20 +36,21 @@ type alias FrontendModel =
 
 
 type alias BackendModel =
-    Maybe InnerBackendModel
-
-
-type alias InnerBackendModel =
     { users : UsersDb
     , activeSessions : Dict SessionId ActiveSession
-    , now : Time.Posix
+    , activeGames : GameDict ()
     }
 
 
 type alias ActiveSession =
-    { playerId : PlayerId
+    { session : Session
     , lastSeen : Time.Posix
     }
+
+
+type Session
+    = LoggedInSession PlayerId
+    | AnonymousSession { nickname : String }
 
 
 type FrontendMsg
@@ -62,22 +61,17 @@ type FrontendMsg
     | Login Email PasswordHash
     | Logout
     | UpdatePage Page
-    | SwitchPage Page
 
 
 type ToBackend
     = TBLogin Email PasswordHash
     | TBLogout
-    | TBAuthenticated TBAuthenticated
-
-
-type TBAuthenticated
-    = TBChangeNickname String
+    | TBChangeNickname String
 
 
 type BackendMsg
     = ClientConnected SessionId ClientId
-    | Tick Time.Posix
+    | TimedMsg Time.Posix ToBackend
 
 
 type ToFrontend

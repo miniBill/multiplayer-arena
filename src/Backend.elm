@@ -15,15 +15,19 @@ type alias Model =
     BackendModel
 
 
+type alias Msg =
+    BackendMsg
+
+
 type alias InnerModel =
     InnerBackendModel
 
 
 app :
-    { init : ( Model, Cmd BackendMsg )
-    , update : BackendMsg -> Model -> ( Model, Cmd BackendMsg )
-    , updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
-    , subscriptions : Model -> Sub BackendMsg
+    { init : ( Model, Cmd Msg )
+    , update : Msg -> Model -> ( Model, Cmd Msg )
+    , updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd Msg )
+    , subscriptions : Model -> Sub Msg
     }
 app =
     Lamdera.backend
@@ -34,15 +38,12 @@ app =
         }
 
 
-subscriptions : Model -> Sub BackendMsg
+subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch
-        [ Lamdera.onConnect ClientConnected
-        , Time.every 10000 Tick
-        ]
+    Lamdera.onConnect ClientConnected
 
 
-init : ( Model, Cmd BackendMsg )
+init : ( Model, Cmd Msg )
 init =
     Update.save Nothing
 
@@ -60,7 +61,7 @@ superAdminUser =
     }
 
 
-update : BackendMsg -> Model -> ( Model, Cmd BackendMsg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg m =
     case ( m, msg ) of
         ( Just model, Tick now ) ->
@@ -107,7 +108,7 @@ update msg m =
                                     )
 
 
-updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
+updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd Msg )
 updateFromFrontend sessionId clientId msg m =
     case m of
         Nothing ->
@@ -163,7 +164,7 @@ updateAuthenticated :
     -> User
     -> TBAuthenticated
     -> InnerModel
-    -> ( InnerModel, Cmd BackendMsg )
+    -> ( InnerModel, Cmd Msg )
 updateAuthenticated playerId _ msg model =
     case msg of
         TBChangeNickname newNickname ->
