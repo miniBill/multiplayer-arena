@@ -1,7 +1,5 @@
 {
   "devDependencies": {
-    "elm": "^0.19.1-5",
-    "elm-spa": "^6.0.4",
     "travelm-agency": "^3.0.2"
   }
 }
