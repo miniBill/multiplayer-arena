@@ -1,9 +1,9 @@
-module Frontend exposing (..)
+module Frontend exposing (app)
 
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Dom
 import Browser.Navigation as Nav exposing (Key)
-import Common as Common exposing (User)
+import Common exposing (User)
 import Element.WithContext as Element exposing (alignRight, centerX, centerY, el, fill, height, px, shrink, text, width)
 import Element.WithContext.Background as Background
 import Element.WithContext.Font as Font

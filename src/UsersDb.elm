@@ -7,13 +7,14 @@ module UsersDb exposing
     , updateUserByPlayerId
     )
 
-import Common exposing (Email, Nickname, PasswordHash, PlayerId, User)
+import Common exposing (Email, Nickname, PasswordHash, PlayerId(..), User)
 import Dict exposing (Dict)
+import Types.PlayerDict as PlayerDict exposing (PlayerDict)
 
 
 type UsersDb
     = UsersDb
-        { users : Dict PlayerId ( User, PasswordHash )
+        { users : PlayerDict ( User, PasswordHash )
         , emailToPlayerId : Dict Email PlayerId
         }
 
@@ -21,7 +22,7 @@ type UsersDb
 init : UsersDb
 init =
     UsersDb
-        { users = Dict.empty
+        { users = PlayerDict.empty
         , emailToPlayerId = Dict.empty
         }
 
@@ -34,7 +35,7 @@ registerUser nickname email hash (UsersDb { users, emailToPlayerId }) =
     else
         let
             playerId =
-                email
+                PlayerId email
 
             newUser =
                 { email = email
@@ -44,7 +45,7 @@ registerUser nickname email hash (UsersDb { users, emailToPlayerId }) =
         in
         Just <|
             UsersDb
-                { users = Dict.insert playerId ( newUser, hash ) users
+                { users = PlayerDict.insert playerId ( newUser, hash ) users
                 , emailToPlayerId = Dict.insert email playerId emailToPlayerId
                 }
 
@@ -54,7 +55,7 @@ getUserByEmailAndPassowrd email hash (UsersDb { users, emailToPlayerId }) =
     Dict.get email emailToPlayerId
         |> Maybe.andThen
             (\playerId ->
-                Dict.get playerId users
+                PlayerDict.get playerId users
                     |> Maybe.andThen
                         (\( user, expectedHash ) ->
                             if expectedHash == hash then
@@ -68,7 +69,7 @@ getUserByEmailAndPassowrd email hash (UsersDb { users, emailToPlayerId }) =
 
 getUserByPlayerId : PlayerId -> UsersDb -> Maybe User
 getUserByPlayerId playerId (UsersDb { users }) =
-    Dict.get playerId users
+    PlayerDict.get playerId users
         |> Maybe.map Tuple.first
 
 
@@ -77,7 +78,7 @@ updateUserByPlayerId playerId f (UsersDb db) =
     UsersDb
         { db
             | users =
-                Dict.update playerId
+                PlayerDict.update playerId
                     (Maybe.map <| Tuple.mapFirst f)
                     db.users
         }

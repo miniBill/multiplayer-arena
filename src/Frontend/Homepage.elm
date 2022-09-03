@@ -3,12 +3,10 @@ module Frontend.Homepage exposing (view)
 import Common exposing (User)
 import Element.WithContext as Element exposing (centerX, centerY, column, el, fill, height, px, scrollbarY, width, wrappedRow)
 import Element.WithContext.Font as Font
-import Element.WithContext.Input as Input
 import Frontend.Common exposing (Msg)
 import Route exposing (AuthorizedPage(..), GamePage(..), GameRoute(..), Page(..), Route(..))
 import Theme exposing (Element)
 import TicTacToe
-import Types exposing (..)
 
 
 view : Maybe User -> Element Msg
@@ -36,7 +34,7 @@ ticktactoeSlot maybeUser =
                 Just user ->
                     AuthorizedPage user <| GamePage <| TicTacToePage TicTacToe.init
     in
-    Input.button []
+    Element.link []
         { label =
             Theme.box [ Font.size 40 ] <|
                 column []
@@ -46,5 +44,5 @@ ticktactoeSlot maybeUser =
                         , description = "Example of a TicTacToe match"
                         }
                     ]
-        , onPress = Just <| SwitchPage <| next
+        , url = next
         }

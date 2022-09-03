@@ -1,11 +1,11 @@
 module Types exposing
-    ( BackendModel
+    ( ActiveSession
+    , BackendModel
     , BackendMsg(..)
     , Context
     , FrontendModel
     , FrontendMsg(..)
-    , InnerBackendModel
-    , TBAuthenticated(..)
+    , Session
     , ToBackend(..)
     , ToFrontend(..)
     )
@@ -16,10 +16,10 @@ import Common exposing (Email, PasswordHash, PlayerId, User)
 import Dict exposing (Dict)
 import L10N exposing (Language)
 import Lamdera exposing (ClientId, SessionId)
-import Route exposing (Page, Route(..))
+import Route exposing (Page)
 import Time
+import Types.GameDict exposing (GameDict)
 import Url exposing (Url)
-import Url.Parser exposing ((</>))
 import UsersDb exposing (UsersDb)
 
 
@@ -38,20 +38,21 @@ type alias FrontendModel =
 
 
 type alias BackendModel =
-    Maybe InnerBackendModel
-
-
-type alias InnerBackendModel =
     { users : UsersDb
     , activeSessions : Dict SessionId ActiveSession
-    , now : Time.Posix
+    , activeGames : GameDict ()
     }
 
 
 type alias ActiveSession =
-    { playerId : PlayerId
+    { session : Session
     , lastSeen : Time.Posix
     }
+
+
+type Session
+    = LoggedInSession PlayerId
+    | AnonymousSession { nickname : String }
 
 
 type FrontendMsg
@@ -62,22 +63,17 @@ type FrontendMsg
     | Login Email PasswordHash
     | Logout
     | UpdatePage Page
-    | SwitchPage Page
 
 
 type ToBackend
     = TBLogin Email PasswordHash
     | TBLogout
-    | TBAuthenticated TBAuthenticated
-
-
-type TBAuthenticated
-    = TBChangeNickname String
+    | TBChangeNickname String
 
 
 type BackendMsg
     = ClientConnected SessionId ClientId
-    | Tick Time.Posix
+    | TimedMsg Time.Posix ToBackend
 
 
 type ToFrontend

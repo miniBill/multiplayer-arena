@@ -1,4 +1,12 @@
-module Common exposing (Email, GameId, Nickname, PasswordHash, PlayerId, User, passwordHash)
+module Common exposing
+    ( Email
+    , GameId(..)
+    , Nickname
+    , PasswordHash
+    , PlayerId(..)
+    , User
+    , passwordHash
+    )
 
 import Sha256
 
@@ -18,12 +26,12 @@ type alias User =
     }
 
 
-type alias PlayerId =
-    String
+type PlayerId
+    = PlayerId String
 
 
-type alias GameId =
-    String
+type GameId
+    = GameId String
 
 
 type PasswordHash
