@@ -1,47 +1,74 @@
 module TicTacToe exposing
-    ( Cell(..)
+    ( Common
+    , Local
     , Model
-    , TicTacToeCommon
-    , TicTacToeLocal
-    , TicTacToeShared
-    , init
+    , Shared
+    , initCommon
+    , initLocal
     )
 
 import Array exposing (Array)
-import Common exposing (GameId, PlayerId)
 import Dict exposing (Dict)
+import Types.Common exposing (PublicProfile)
+import Types.GameId as GameId exposing (GameId)
+import Types.PlayerId as PlayerId exposing (PlayerId)
 
 
 type alias Model =
-    Maybe
-        { gameId : GameId
-        , local : TicTacToeLocal
-        , shared : TicTacToeShared
-        , common : TicTacToeCommon
-        , others : Dict PlayerId TicTacToeShared
-        }
+    { gameId : GameId
+    , local : Local
+    , shared : Shared
+    , common : Common
+    , others :
+        PlayerId.Dict
+            { profile : PublicProfile
+            , shared : Shared
+            }
+    }
 
 
-type alias TicTacToeLocal =
+{-| Player-owned state, never shared.
+-}
+type alias Local =
     {}
 
 
-type alias TicTacToeShared =
-    { isCross : Bool
+{-| Player-owned state, shared with other players
+-}
+type alias Shared =
+    {}
+
+
+{-| Server-owned state.
+-}
+type alias Common =
+    { crossPlayer : PlayerId
+    , naughtPlayer : PlayerId
+    , grid : Array (Array Cell)
     }
 
 
-type alias TicTacToeCommon =
-    { grid : Array (Array Cell)
+type Player
+    = Naught
+    | Cross
+
+
+type alias Cell =
+    Maybe Player
+
+
+initLocal : {}
+initLocal =
+    {}
+
+
+initCommon :
+    { crossPlayer : PlayerId
+    , naughtPlayer : PlayerId
     }
-
-
-type Cell
-    = Cross
-    | Naught
-    | Empty
-
-
-init : Model
-init =
-    Nothing
+    -> Common
+initCommon { crossPlayer, naughtPlayer } =
+    { crossPlayer = crossPlayer
+    , naughtPlayer = naughtPlayer
+    , grid = Array.repeat 3 (Array.repeat 3 Nothing)
+    }

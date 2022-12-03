@@ -1,6 +1,5 @@
 module Types exposing
-    ( ActiveSession
-    , BackendModel
+    ( BackendModel
     , BackendMsg(..)
     , Context
     , FrontendModel
@@ -12,20 +11,20 @@ module Types exposing
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
-import Common exposing (Email, PasswordHash, PlayerId, User)
 import Dict exposing (Dict)
-import L10N exposing (Language)
 import Lamdera exposing (ClientId, SessionId)
 import Route exposing (Page)
+import TicTacToe
 import Time
-import Types.GameDict exposing (GameDict)
+import Translations exposing (I18n)
+import Types.GameId as GameId
+import Types.PlayerId as PlayerId
 import Url exposing (Url)
-import UsersDb exposing (UsersDb)
 
 
 type alias Context =
     { tz : Time.Zone
-    , language : Language
+    , i18n : I18n
     }
 
 
@@ -38,21 +37,22 @@ type alias FrontendModel =
 
 
 type alias BackendModel =
-    { users : UsersDb
-    , activeSessions : Dict SessionId ActiveSession
-    , activeGames : GameDict ()
+    { sessions : Dict SessionId Session
+    , games : GameId.Dict Game
     }
 
 
-type alias ActiveSession =
-    { session : Session
+type Game
+    = TicTacToeGame
+        { shared : PlayerId.Dict TicTacToe.Shared
+        , common : TicTacToe.Common
+        }
+
+
+type alias Session =
+    { nickname : String
     , lastSeen : Time.Posix
     }
-
-
-type Session
-    = LoggedInSession PlayerId
-    | AnonymousSession { nickname : String }
 
 
 type FrontendMsg
@@ -60,15 +60,11 @@ type FrontendMsg
     | UrlChanged Url
     | Timezone Time.Zone
     | Size ( Int, Int )
-    | Login Email PasswordHash
-    | Logout
     | UpdatePage Page
 
 
 type ToBackend
-    = TBLogin Email PasswordHash
-    | TBLogout
-    | TBChangeNickname String
+    = TBChangeNickname String
 
 
 type BackendMsg
@@ -77,5 +73,4 @@ type BackendMsg
 
 
 type ToFrontend
-    = TFLoginResult (Result String User)
-    | TFLogout
+    = TFNop

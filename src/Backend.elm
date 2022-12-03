@@ -1,33 +1,21 @@
-module Backend exposing (InnerModel, Model, Msg, app)
+module Backend exposing (app)
 
-import Common exposing (PasswordHash, PlayerId, User)
+import Common exposing (PasswordHash, User)
 import Dict
 import Lamdera exposing (ClientId, SessionId)
 import Process
 import Task
 import Time
 import Types exposing (..)
+import Types.GameId as GameId
 import Update.Pipeline as Update
-import UsersDb
-
-
-type alias Model =
-    BackendModel
-
-
-type alias Msg =
-    BackendMsg
-
-
-type alias InnerModel =
-    InnerBackendModel
 
 
 app :
-    { init : ( Model, Cmd Msg )
-    , update : Msg -> Model -> ( Model, Cmd Msg )
-    , updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd Msg )
-    , subscriptions : Model -> Sub Msg
+    { init : ( BackendModel, Cmd BackendMsg )
+    , update : BackendMsg -> BackendModel -> ( BackendModel, Cmd BackendMsg )
+    , updateFromFrontend : SessionId -> ClientId -> ToBackend -> BackendModel -> ( BackendModel, Cmd BackendMsg )
+    , subscriptions : BackendModel -> Sub BackendMsg
     }
 app =
     Lamdera.backend
@@ -38,30 +26,20 @@ app =
         }
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : BackendModel -> Sub BackendMsg
 subscriptions _ =
     Lamdera.onConnect ClientConnected
 
 
-init : ( Model, Cmd Msg )
+init : ( BackendModel, Cmd BackendMsg )
 init =
-    Update.save Nothing
+    Update.save
+        { sessions = Dict.empty
+        , games = GameId.dict.empty
+        }
 
 
-superAdmin : ( User, PasswordHash )
-superAdmin =
-    ( superAdminUser, Common.passwordHash "wololo" )
-
-
-superAdminUser : User
-superAdminUser =
-    { email = "cmt.miniBill@gmail.com"
-    , isAdmin = True
-    , nickname = "miniBill"
-    }
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : BackendMsg -> BackendModel -> ( BackendModel, Cmd BackendMsg )
 update msg m =
     case ( m, msg ) of
         ( Just model, Tick now ) ->
@@ -108,7 +86,7 @@ update msg m =
                                     )
 
 
-updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd Msg )
+updateFromFrontend : SessionId -> ClientId -> ToBackend -> BackendModel -> ( BackendModel, Cmd BackendMsg )
 updateFromFrontend sessionId clientId msg m =
     case m of
         Nothing ->

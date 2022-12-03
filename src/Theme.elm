@@ -1,8 +1,10 @@
-module Theme exposing (Attribute, Element, box, colors, column, fontSizes, link, padding, row, spacing)
+module Theme exposing (Attribute, Element, box, colors, column, fontSizes, link, padding, row, spacing, text)
 
 import Element.WithContext as Element exposing (Color, el)
 import Element.WithContext.Border as Border
 import Element.WithContext.Font as Font
+import Route exposing (Route)
+import Translations exposing (I18n)
 import Types exposing (Context)
 
 
@@ -85,6 +87,14 @@ row attrs =
     Element.row (spacing :: attrs)
 
 
-link : List (Attribute msg) -> { label : Element msg, url : String } -> Element msg
-link attrs =
+link : List (Attribute msg) -> { label : Element msg, route : Route } -> Element msg
+link attrs config =
     Element.link (Font.underline :: attrs)
+        { label = config.label
+        , url = Route.routeToUrl config.route
+        }
+
+
+text : (I18n -> String) -> Element msg
+text content =
+    Element.with .i18n (\i18n -> Element.text <| content i18n)

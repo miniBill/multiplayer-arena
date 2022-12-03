@@ -1,16 +1,14 @@
 module Frontend.Homepage exposing (view)
 
-import Common exposing (User)
 import Element.WithContext as Element exposing (centerX, centerY, column, el, fill, height, px, scrollbarY, width, wrappedRow)
 import Element.WithContext.Font as Font
-import Frontend.Common exposing (Msg)
-import Route exposing (AuthorizedPage(..), GamePage(..), GameRoute(..), Page(..), Route(..))
+import Route exposing (GamePage(..), GameRoute(..), Page(..), Route(..))
 import Theme exposing (Element)
-import TicTacToe
+import Types exposing (FrontendMsg)
 
 
-view : Maybe User -> Element Msg
-view maybeUser =
+view : Element FrontendMsg
+view =
     el [ width fill, height fill ] <|
         wrappedRow
             [ centerX
@@ -18,23 +16,12 @@ view maybeUser =
             , Theme.padding
             , scrollbarY
             ]
-            [ ticktactoeSlot maybeUser ]
+            [ ticktactoeSlot ]
 
 
-ticktactoeSlot : Maybe User -> Element Msg
-ticktactoeSlot maybeUser =
-    let
-        next =
-            case maybeUser of
-                Nothing ->
-                    LoginPage <|
-                        Route.initLoginPageData <|
-                            GameRoute TicTacToeLobbyRoute
-
-                Just user ->
-                    AuthorizedPage user <| GamePage <| TicTacToePage TicTacToe.init
-    in
-    Element.link []
+ticktactoeSlot : Element FrontendMsg
+ticktactoeSlot =
+    Theme.link []
         { label =
             Theme.box [ Font.size 40 ] <|
                 column []
@@ -44,5 +31,5 @@ ticktactoeSlot maybeUser =
                         , description = "Example of a TicTacToe match"
                         }
                     ]
-        , url = next
+        , route = GameRoute TicTacToeLobbyRoute
         }

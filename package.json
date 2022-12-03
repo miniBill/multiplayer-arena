@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "travelm-agency": "^3.0.2"
+  },
+  "scripts": {
+    "translate": "travelm-agency translations --inline --i18n_arg_last"
   }
 }

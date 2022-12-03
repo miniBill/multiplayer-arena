@@ -1,0 +1,1 @@
+joiningGame = Joining game {$game}
